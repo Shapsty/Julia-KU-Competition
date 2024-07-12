@@ -29,7 +29,11 @@ function prompt_date(prompt::String, list)
     first_date = parse(Int64, string(first_date[2]))
     last_date = parse(Int64, string(last_date[2]))
 
-    if first_date == 0 || first_date == 1
+    if first_date == 0
+        first_date = 2
+        last_date = last_date + 1
+    end
+    if first_date == 1
         first_date = 2
     end
 
