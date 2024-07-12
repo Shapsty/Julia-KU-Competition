@@ -1,5 +1,5 @@
 # Creator
-Robert "Max" Reynolds, Reid...
+Robert "Max" Reynolds, Reid Ellis...
 
 # Bio
 Weather app for KU programming competition
