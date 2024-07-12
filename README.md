@@ -5,6 +5,7 @@ Robert "Max" Reynolds, Reid...
 Weather app for KU programming competition
 
 # TODO -- Basic TODO's more advanced to come
+dude
 Link to pdf: https://engr.ku.edu/sites/engr/files/documents/SELF/High%20School%20Design%202024%20Rules%20Packet.pdf
 basic:
    users need to be able to specify input file (What is file format???)
