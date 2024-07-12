@@ -39,7 +39,7 @@ function main(file_path::String)
     check_for_temperature_max = prompt_boolean("Do you want to check for the temperature max?")
     check_for_temperature_min = prompt_boolean("Do you want to check for the temperature min?")
     check_for_precipitation_sum = prompt_boolean("Do you want to check for the precipitation sum?")
-    check_for_wind_speed_max = prompt_boolean("Do you want to check for the wind speed_max?")
+    check_for_wind_speed_max = prompt_boolean("Do you want to check for the wind speed max?")
     check_for_precipitation_probability_max = prompt_boolean("Do you want to check for the precipitation probability max?")
 
     open(file_path, "r") do input_file
