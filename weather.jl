@@ -15,7 +15,7 @@ function prompt_date(prompt::String, list)
     value = readline()
 
     if !occursin(" to ", value)
-        return value
+        return [value]
     end
 
     value = split(value, " to ")
@@ -33,24 +33,18 @@ function prompt_date(prompt::String, list)
         first_date = 2
     end
 
-    println(first_date)
-    println(last_date)
-    new_list = []
+    new_list = Vector{String}([])
     for (j,item) in enumerate(list[1])
         if j < first_date
             splice!(list[1], 1)
         end
-        push!(new_list,list[1][j])
+        push!(new_list, list[1][j])
         if j == last_date
             break
         end
     end
-    print(new_list)
-    # convert days into dates using for loop which gets all dates and their position. 
-    # Then uses the day number from value to specify start and end positions: returns list of converted dates
-    # run main code for each date from list
-
-    return value
+    list[1] = Vector{SubString{String}}(["date:", "2024-04-24", "2024-04-25", "2024-04-26", "2024-04-27", "2024-04-28", "2024-04-29"])
+    return new_list
 end
 
 function convert_weather_code_to_words(weather_code)
@@ -191,37 +185,39 @@ function main(file_path::String)
         for item in total_lines_manipulated
             total_lines_manipulated = replace(total_lines_manipulated, item=>split(item, " "))
         end
-        date = prompt_date("Enter the date you want to enter in format of year-month-day(Example: 2024-04-24)", total_lines_manipulated)
+        dates = prompt_date("Enter the date you want to enter in format of year-month-day(Example: 2024-04-24)", total_lines_manipulated)
         # check if date in weather file and if so return index to access other infomation
-        if date in total_lines_manipulated[1]
-            index_of_date = findfirst(x -> x == date, total_lines_manipulated[1])
-        end
-
-        # giant logic block, I feel as though there is a way to write more concisely -> aha, use function with parameters of the boolean, sub_string, and list to check
-        if check_for_weather_code
-            index_of_weather_code = return_index_of_property(total_lines, "weather_code")
-            weather_code_translated = convert_weather_code_to_words(total_lines_manipulated[index_of_weather_code][index_of_date])
-            println(weather_code_translated)
-        end
-        if check_for_temperature_max
-            index_of_temp_max = return_index_of_property(total_lines, "temperature_max")
-            println(total_lines_manipulated[index_of_temp_max][index_of_date])
-        end
-        if check_for_temperature_min
-            index_of_temp_min = return_index_of_property(total_lines, "temperature_min")
-            println(total_lines_manipulated[index_of_temp_min][index_of_date])
-        end
-        if check_for_precipitation_sum
-            index_of_precipitation_sum = return_index_of_property(total_lines, "precipitation_sum")
-            println(total_lines_manipulated[index_of_precipitation_sum][index_of_date])
-        end
-        if check_for_wind_speed_max
-            index_of_wind_speed_max = return_index_of_property(total_lines, "wind_speed_max")
-            println(total_lines_manipulated[index_of_wind_speed_max][index_of_date])
-        end
-        if check_for_precipitation_probability_max
-            index_of_precipitation_probability_max = return_index_of_property(total_lines, "precipitation_probability_max")
-            println(total_lines_manipulated[index_of_precipitation_probability_max][index_of_date])
+        for date in dates
+            if date in total_lines_manipulated[1]
+                index_of_date = findfirst(x -> x == date, total_lines_manipulated[1])
+            end
+    
+            # giant logic block, I feel as though there is a way to write more concisely -> aha, use function with parameters of the boolean, sub_string, and list to check
+            if check_for_weather_code
+                index_of_weather_code = return_index_of_property(total_lines, "weather_code")
+                weather_code_translated = convert_weather_code_to_words(total_lines_manipulated[index_of_weather_code][index_of_date])
+                println(weather_code_translated)
+            end
+            if check_for_temperature_max
+                index_of_temp_max = return_index_of_property(total_lines, "temperature_max")
+                println(total_lines_manipulated[index_of_temp_max][index_of_date])
+            end
+            if check_for_temperature_min
+                index_of_temp_min = return_index_of_property(total_lines, "temperature_min")
+                println(total_lines_manipulated[index_of_temp_min][index_of_date])
+            end
+            if check_for_precipitation_sum
+                index_of_precipitation_sum = return_index_of_property(total_lines, "precipitation_sum")
+                println(total_lines_manipulated[index_of_precipitation_sum][index_of_date])
+            end
+            if check_for_wind_speed_max
+                index_of_wind_speed_max = return_index_of_property(total_lines, "wind_speed_max")
+                println(total_lines_manipulated[index_of_wind_speed_max][index_of_date])
+            end
+            if check_for_precipitation_probability_max
+                index_of_precipitation_probability_max = return_index_of_property(total_lines, "precipitation_probability_max")
+                println(total_lines_manipulated[index_of_precipitation_probability_max][index_of_date])
+            end
         end
     end
 end
