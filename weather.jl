@@ -10,7 +10,7 @@ function prompt_boolean(prompt::String)::Bool
 end
 
 # make this more advanced to check for multiple dates
-function prompt_date(prompt::String)
+function prompt_date(prompt::String, list)
     println(prompt)
     value = readline()
 
@@ -23,6 +23,29 @@ function prompt_date(prompt::String)
     first_date = value[1]
     last_date = value[2]
 
+    first_date = split(first_date, " ")
+    last_date = split(last_date, " ")
+
+    first_date = parse(Int64, string(first_date[2]))
+    last_date = parse(Int64, string(last_date[2]))
+
+    if first_date == 0 || first_date == 1
+        first_date = 2
+    end
+
+    println(first_date)
+    println(last_date)
+    new_list = []
+    for (j,item) in enumerate(list[1])
+        if j < first_date
+            splice!(list[1], 1)
+        end
+        push!(new_list,list[1][j])
+        if j == last_date
+            break
+        end
+    end
+    print(new_list)
     # convert days into dates using for loop which gets all dates and their position. 
     # Then uses the day number from value to specify start and end positions: returns list of converted dates
     # run main code for each date from list
@@ -150,7 +173,6 @@ function return_index_of_property(list, sub_string)
 end
 
 function main(file_path::String)
-    date = prompt_date("Enter the date you want to enter in format of year-month-day(Example: 2024-04-24)")
     check_for_weather_code = prompt_boolean("Do you want to check for the weather code?")
     check_for_temperature_max = prompt_boolean("Do you want to check for the temperature max?")
     check_for_temperature_min = prompt_boolean("Do you want to check for the temperature min?")
@@ -169,12 +191,13 @@ function main(file_path::String)
         for item in total_lines_manipulated
             total_lines_manipulated = replace(total_lines_manipulated, item=>split(item, " "))
         end
+        date = prompt_date("Enter the date you want to enter in format of year-month-day(Example: 2024-04-24)", total_lines_manipulated)
         # check if date in weather file and if so return index to access other infomation
         if date in total_lines_manipulated[1]
             index_of_date = findfirst(x -> x == date, total_lines_manipulated[1])
         end
 
-        # giant logic block, I feel as though there is a way to write more concisely
+        # giant logic block, I feel as though there is a way to write more concisely -> aha, use function with parameters of the boolean, sub_string, and list to check
         if check_for_weather_code
             index_of_weather_code = return_index_of_property(total_lines, "weather_code")
             weather_code_translated = convert_weather_code_to_words(total_lines_manipulated[index_of_weather_code][index_of_date])
@@ -203,5 +226,4 @@ function main(file_path::String)
     end
 end
 
-#main("Example weather file.txt")
-println(prompt_date("Enter the date you want to enter in format of year-month-day(Example: 2024-04-24)"))
+main("Example weather file.txt")
