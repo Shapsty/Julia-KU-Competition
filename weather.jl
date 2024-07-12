@@ -14,6 +14,19 @@ function prompt_date(prompt::String)
     println(prompt)
     value = readline()
 
+    if !occursin(" to ", value)
+        return value
+    end
+
+    value = split(value, " to ")
+
+    first_date = value[1]
+    last_date = value[2]
+
+    # convert days into dates using for loop which gets all dates and their position. 
+    # Then uses the day number from value to specify start and end positions: returns list of converted dates
+    # run main code for each date from list
+
     return value
 end
 
@@ -190,4 +203,5 @@ function main(file_path::String)
     end
 end
 
-main("Example weather file.txt")
+#main("Example weather file.txt")
+println(prompt_date("Enter the date you want to enter in format of year-month-day(Example: 2024-04-24)"))
