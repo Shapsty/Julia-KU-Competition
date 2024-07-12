@@ -88,4 +88,6 @@ function main(file_path::String)
     end
 end
 
+#This is a test comment for git functionality
+
 main("Example weather file.txt")
