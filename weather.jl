@@ -1,5 +1,13 @@
 include("weather_codes.jl")
 
+function prompt_path(prompt::String)
+    println(prompt)
+    value = readline()
+    #normalize path to use forward slash, trust me things get crazy elsewise
+    value = replace(value, "\\" => "/")
+    return value
+end
+
 # Make this more advanced for more functionality
 function prompt_boolean(prompt::String)::Bool
     println(prompt)
@@ -98,6 +106,7 @@ function return_properties(list_manipulated, list_unmaniplated, boolean, string_
 end
 
 function main(file_path::String)
+    file_path = prompt_path("Paste the file path:")
     check_for_weather_code = prompt_boolean("Do you want to check for the weather code?")
     check_for_temperature_max = prompt_boolean("Do you want to check for the temperature max?")
     check_for_temperature_min = prompt_boolean("Do you want to check for the temperature min?")
