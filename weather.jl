@@ -11,29 +11,10 @@ function prompt_boolean(prompt::String)::Bool
     return false
 end
 
-# TODO: need to make it so that an indivdual day can be represented as day_x and also so that multiple days can be represented as 2024-04-24 to 2024-04-25
-function prompt_date(prompt::String, list)
-    println(prompt)
-    value = readline()
-
-    # check if single date
-    if !occursin(" to ", value)
-        return [value]
-    end
-
-    # formatting variables to only get number of day
-    value = split(value, " to ")
-    first_date = value[1]
-    last_date = value[2]
-
-    first_date = split(first_date, " ")
-    last_date = split(last_date, " ")
-
-    # turn days from string to integer
-    first_date = parse(Int64, string(first_date[2]))
-    last_date = parse(Int64, string(last_date[2]))
-
-    # since julia uses 1 based query instead of 0 based query, adjust
+function iter_mess_function_find_better_name_later(first_date, last_date, list)
+    # probably a better way to do this
+    listy = copy(list[1])
+     # since julia uses 1 based query instead of 0 based query, adjust
     if first_date == 0
         first_date = 2
         last_date = last_date + 1
@@ -44,7 +25,6 @@ function prompt_date(prompt::String, list)
     end
 
     new_list = Vector{String}([])
-    # TODO find better way than enumerate
     for (j,item) in enumerate(list[1])
         # if is before first date, remove it
         if j < first_date
@@ -57,8 +37,39 @@ function prompt_date(prompt::String, list)
         end
     end
     # reset list[1] because julia is weird with lists
-    list[1] = Vector{SubString{String}}(["date:", "2024-04-24", "2024-04-25", "2024-04-26", "2024-04-27", "2024-04-28", "2024-04-29"])
+    list[1] = Vector{SubString{String}}(listy)
     return new_list
+end
+
+# TODO: need to make it so that an indivdual day can be represented as day_x and also so that multiple days can be represented as 2024-04-24 to 2024-04-25
+function prompt_date(prompt::String, list)
+    println(prompt)
+    value = readline()
+     # check if single date, day format (and convert)
+     if startswith(value, "day") && !occursin(" to ", value)
+        first_date = parse(Int64, string(split(value, " ")[2]))
+        last_date = first_date
+
+        value = iter_mess_function_find_better_name_later(first_date, last_date, list)
+        return value
+    end
+    # check if single date regular date  format
+    if !occursin(" to ", value)
+        return [value]
+    end
+    # formatting variables to only get number of day
+    value = split(value, " to ")
+    first_date = value[1]
+    last_date = value[2]
+
+    first_date = split(first_date, " ")
+    last_date = split(last_date, " ")
+
+    # turn days from string to integer
+    first_date = parse(Int64, string(first_date[2]))
+    last_date = parse(Int64, string(last_date[2]))
+
+    value = iter_mess_function_find_better_name_later(first_date, last_date, list)
 end
 
 function return_index_of_property(list, sub_string)
