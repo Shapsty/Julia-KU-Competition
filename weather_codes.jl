@@ -1,6 +1,5 @@
 function convert_weather_code_to_words(weather_code)
-    # dict containing all weather codes
-    # TODO put dict in seperate file to make code more pretty. Then call when needed
+    # could probably just make this a const
     weather_codes = Dict(
         "0.0" => "Cloud development not observed or not observable (Characteristic change of the state of sky during the past hour)",
         "1.0" => "Clouds generally dissolving or becoming less developed (Characteristic change of the state of sky during the past hour)",
@@ -103,6 +102,5 @@ function convert_weather_code_to_words(weather_code)
         "98.0" => "Thunderstorm combined with duststorm or sandstorm at time of observation (Thunderstorm at time of observation)",
         "99.0" => "Thunderstorm, heavy, with hail at time of observation (Thunderstorm at time of observation)"
     )
-
     return weather_codes[weather_code]
 end
