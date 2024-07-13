@@ -38,7 +38,6 @@ function iterate_vector_get_specific_dates(first_date, last_date, list)
     return new_list
 end
 
-# TODO: need to make it so that multiple days can be represented as 2024-04-24 to 2024-04-25
 function prompt_date(prompt::String, list)
     println(prompt)
     value = readline()
@@ -56,8 +55,8 @@ function prompt_date(prompt::String, list)
     if !startswith(value, "day") && occursin(" to ", value)
         value = split(value, " to ")
 
-        first_date = findfirst(x -> x == value[1], list[1])
-        last_date = findfirst(x -> x == value[2], list[1])
+        first_date = findfirst(x -> x == value[1], list[1])-1
+        last_date = findfirst(x -> x == value[2], list[1])-1
 
         value = iterate_vector_get_specific_dates(first_date, last_date, list)
         return value
