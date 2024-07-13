@@ -11,8 +11,7 @@ function prompt_boolean(prompt::String)::Bool
     return false
 end
 
-function iter_mess_function_find_better_name_later(first_date, last_date, list)
-    # probably a better way to do this
+function iterate_vector_get_specific_dates(first_date, last_date, list)
     listy = copy(list[1])
      # since julia uses 1 based query instead of 0 based query, adjust
     if first_date == 0
@@ -25,33 +24,40 @@ function iter_mess_function_find_better_name_later(first_date, last_date, list)
     end
 
     new_list = Vector{String}([])
-    for (j,item) in enumerate(list[1])
+    for (counter,item) in enumerate(list[1])
         # if is before first date, remove it
-        if j < first_date
+        if counter < first_date
             splice!(list[1], 1)
         end
         push!(new_list, list[1][j])
-        # if on last date end
-        if j == last_date
+        # if on last date then end
+        if counter == last_date
             break
         end
     end
-    # reset list[1] because julia is weird with lists
+    # reset list[1] because when assigning a variable to another variable in julia it simply makes that new variable point to the same memory. 
+    # Thus if you want to assign a variable to the value of another you must use copy()
     list[1] = Vector{SubString{String}}(listy)
     return new_list
 end
 
-# TODO: need to make it so that an indivdual day can be represented as day_x and also so that multiple days can be represented as 2024-04-24 to 2024-04-25
+# TODO: need to make it so that multiple days can be represented as 2024-04-24 to 2024-04-25
 function prompt_date(prompt::String, list)
     println(prompt)
     value = readline()
+
+    # can probably make next three if statements more effcient
      # check if single date, day format (and convert)
      if startswith(value, "day") && !occursin(" to ", value)
         first_date = parse(Int64, string(split(value, " ")[2]))
         last_date = first_date
 
-        value = iter_mess_function_find_better_name_later(first_date, last_date, list)
+        value = iterate_vector_get_specific_dates(first_date, last_date, list)
         return value
+    end
+    # check if in date format and has multiple dates
+    if !startswith(value, "day") && occursin(" to ", value)
+
     end
     # check if single date regular date  format
     if !occursin(" to ", value)
@@ -69,7 +75,7 @@ function prompt_date(prompt::String, list)
     first_date = parse(Int64, string(first_date[2]))
     last_date = parse(Int64, string(last_date[2]))
 
-    value = iter_mess_function_find_better_name_later(first_date, last_date, list)
+    value = iterate_vector_get_specific_dates(first_date, last_date, list)
 end
 
 function return_index_of_property(list, sub_string)
