@@ -1,5 +1,6 @@
 include("weather_codes.jl")
 
+# Returns file path in usable format
 function prompt_path(prompt::String)
     println(prompt)
     value = readline()
