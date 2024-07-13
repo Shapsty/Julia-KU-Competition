@@ -1,9 +1,10 @@
 include("weather_codes.jl")
 
+# Returns file path in usable format
 function prompt_path(prompt::String)
     println(prompt)
     value = readline()
-    #normalize path to use forward slash, trust me things get crazy elsewise
+    # normalize path to use forward slash, trust me things get crazy elsewise
     value = replace(value, "\\" => "/")
     return value
 end
