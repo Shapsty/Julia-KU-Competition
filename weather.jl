@@ -28,7 +28,7 @@ function iterate_vector_get_specific_dates(first_date, last_date, list)
         last_date = last_date + 1
     end
     new_list = Vector{String}([])
-    # get rid of date
+    # get rid of "date:"
     filter!(e->e≠"date:",list[1])
     for (counter,item) in enumerate(list[1])
         # if before counter is before first date ignore
@@ -37,7 +37,6 @@ function iterate_vector_get_specific_dates(first_date, last_date, list)
         push!(new_list, list[1][counter])
         # if on last date then end
         if counter == last_date
-            println("last date $last_date")
             break
         end
     end
