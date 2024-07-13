@@ -11,8 +11,9 @@ function prompt_boolean(prompt::String)::Bool
     return false
 end
 
+# TODO this is not working
 function iterate_vector_get_specific_dates(first_date, last_date, list)
-    listy = copy(list[1])
+    pre_changed_list = copy(list[1])
      # since julia uses 1 based query instead of 0 based query, adjust
     if first_date == 0
         first_date = 2
@@ -29,7 +30,7 @@ function iterate_vector_get_specific_dates(first_date, last_date, list)
         if counter < first_date
             splice!(list[1], 1)
         end
-        push!(new_list, list[1][j])
+        push!(new_list, list[1][counter])
         # if on last date then end
         if counter == last_date
             break
@@ -37,7 +38,7 @@ function iterate_vector_get_specific_dates(first_date, last_date, list)
     end
     # reset list[1] because when assigning a variable to another variable in julia it simply makes that new variable point to the same memory. 
     # Thus if you want to assign a variable to the value of another you must use copy()
-    list[1] = Vector{SubString{String}}(listy)
+    list[1] = Vector{SubString{String}}(pre_changed_list)
     return new_list
 end
 
@@ -57,7 +58,13 @@ function prompt_date(prompt::String, list)
     end
     # check if in date format and has multiple dates
     if !startswith(value, "day") && occursin(" to ", value)
+        value = split(value, " to ")
 
+        first_date = findfirst(x -> x == value[1], list[1])
+        last_date = findfirst(x -> x == value[2], list[1])
+
+        value = iterate_vector_get_specific_dates(first_date, last_date, list)
+        return value
     end
     # check if single date regular date  format
     if !occursin(" to ", value)
