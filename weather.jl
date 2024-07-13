@@ -11,28 +11,24 @@ function prompt_boolean(prompt::String)::Bool
     return false
 end
 
-# TODO this is not working
 function iterate_vector_get_specific_dates(first_date, last_date, list)
     pre_changed_list = copy(list[1])
      # since julia uses 1 based query instead of 0 based query, adjust
     if first_date == 0
-        first_date = 2
+        first_date = 1
         last_date = last_date + 1
     end
-    # in order not to return "date:"
-    if first_date == 1
-        first_date = 2
-    end
-
     new_list = Vector{String}([])
+    # get rid of date
+    filter!(e->e≠"date:",list[1])
     for (counter,item) in enumerate(list[1])
-        # if is before first date, remove it
-        if counter < first_date
-            splice!(list[1], 1)
-        end
+        # if before counter is before first date ignore
+        if !(counter >= first_date) continue end
+
         push!(new_list, list[1][counter])
         # if on last date then end
         if counter == last_date
+            println("last date $last_date")
             break
         end
     end
