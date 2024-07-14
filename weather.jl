@@ -19,7 +19,7 @@ end
 
 function iterate_vector_get_specific_dates(first_date, last_date, list)
     changed_list = copy(list[1])
-     # since julia uses 1 based query instead of 0 based query, adjust
+    # since julia uses 1 based query instead of 0 based query, adjust -- maybe make it standarized, like only use 0 based query or only use 1 based query.
     if first_date == 0
         first_date = 1
         last_date = last_date + 1
@@ -45,7 +45,7 @@ function prompt_date(prompt::String, list)
     value = readline()
 
     # can probably make next three if statements more effcient
-    # check if single date, day format (and convert)
+    # check if single, day format (and convert)
     if startswith(value, "day") && !occursin(r"\s+to\s+", value)
         first_date = parse(Int64, split(value, " ")[2])
 
@@ -99,13 +99,13 @@ function return_properties(list_manipulated, list_unmaniplated, boolean, string_
         if string_to_check != "weather_code" return list_manipulated[index_of_property][index_of_date] end
 
         # if looking for weather codes translate them
-        weather_code_translated = convert_weather_code_to_words(list_manipulated[index_of_property][index_of_date])
+        weather_code_translated = WEATHER_CODES[list_manipulated[index_of_property][index_of_date]]
         return weather_code_translated
     end
 end
 
 function main()
-    file_path = prompt_path("Paste the file path:")
+    file_path = prompt_path("What path do you want to use?")
     check_for_weather_code = prompt_boolean("Do you want to check for the weather code?")
     check_for_temperature_max = prompt_boolean("Do you want to check for the temperature max?")
     check_for_temperature_min = prompt_boolean("Do you want to check for the temperature min?")
