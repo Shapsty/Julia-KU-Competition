@@ -14,77 +14,75 @@ function prompt_boolean(prompt::String)::Bool
     println(prompt)
     value = readline()
     
-    if value == "y"
-        return true
-    end
-    return false
+    return lowercase(value) == "y"
 end
 
-function iter_mess_function_find_better_name_later(first_date, last_date, list)
-    # probably a better way to do this
-    listy = copy(list[1])
+function iterate_vector_get_specific_dates(first_date, last_date, list)
+    changed_list = copy(list[1])
      # since julia uses 1 based query instead of 0 based query, adjust
     if first_date == 0
-        first_date = 2
+        first_date = 1
         last_date = last_date + 1
     end
-    # in order not to return "date:"
-    if first_date == 1
-        first_date = 2
-    end
-
     new_list = Vector{String}([])
-    for (j,item) in enumerate(list[1])
-        # if is before first date, remove it
-        if j < first_date
-            splice!(list[1], 1)
-        end
-        push!(new_list, list[1][j])
-        # if on last date end
-        if j == last_date
+    # get rid of "date:"
+    filter!(e->e≠"date:", changed_list)
+    for (counter,item) in enumerate(changed_list)
+        # if before counter is before first date ignore
+        if !(counter >= first_date) continue end
+
+        push!(new_list, changed_list[counter])
+        # if on last date then end
+        if counter == last_date
             break
         end
     end
-    # reset list[1] because julia is weird with lists
-    list[1] = Vector{SubString{String}}(listy)
     return new_list
 end
 
-# TODO: need to make it so that an indivdual day can be represented as day_x and also so that multiple days can be represented as 2024-04-24 to 2024-04-25
 function prompt_date(prompt::String, list)
     println(prompt)
     value = readline()
-     # check if single date, day format (and convert)
-     if startswith(value, "day") && !occursin(" to ", value)
-        first_date = parse(Int64, string(split(value, " ")[2]))
-        last_date = first_date
 
-        value = iter_mess_function_find_better_name_later(first_date, last_date, list)
-        return value
+    # can probably make next three if statements more effcient
+    # check if single date, day format (and convert)
+    if startswith(value, "day") && !occursin(r"\s+to\s+", value)
+        first_date = parse(Int64, split(value, " ")[2])
+
+        return iterate_vector_get_specific_dates(first_date, first_date, list)
+    end
+    # check if in date format and has multiple dates
+    if !startswith(value, "day") && occursin(r"\s+to\s+", value)
+        start, stop  = split(value, r"\s+to\s+")
+
+        first_date = findfirst(x -> x == start, list[1])-1
+        last_date = findfirst(x -> x == stop, list[1])-1
+
+        return iterate_vector_get_specific_dates(first_date, last_date, list)
     end
     # check if single date regular date  format
     if !occursin(" to ", value)
         return [value]
     end
     # formatting variables to only get number of day
-    value = split(value, " to ")
-    first_date = value[1]
-    last_date = value[2]
+    start, stop = split(value, r"\s+to\s+")
+    first_date = start
+    last_date = stop
 
     first_date = split(first_date, " ")
     last_date = split(last_date, " ")
 
     # turn days from string to integer
-    first_date = parse(Int64, string(first_date[2]))
-    last_date = parse(Int64, string(last_date[2]))
+    first_date = parse(Int64, (first_date[2]))
+    last_date = parse(Int64, (last_date[2]))
 
-    value = iter_mess_function_find_better_name_later(first_date, last_date, list)
+    value = iterate_vector_get_specific_dates(first_date, last_date, list)
 end
 
 function return_index_of_property(list, sub_string)
     for line in list
         if occursin(sub_string, line) 
-            index = findfirst(x -> x == line, list)
+            index = findfirst(==(line), list)
             return index
         end
     end
@@ -115,31 +113,27 @@ function main()
     check_for_wind_speed_max = prompt_boolean("Do you want to check for the wind speed max?")
     check_for_precipitation_probability_max = prompt_boolean("Do you want to check for the precipitation probability max?")
     
-    open(file_path, "r") do input_file
-        total_lines = [line for line in eachline(input_file)]
-        # probably can do this variable better
-        total_lines_manipulated = total_lines
+    total_lines = [line for line in eachline(open(file_path))]
+    # probably can do this variable better
+    total_lines_manipulated = total_lines
 
-        index_of_date = 0
+    index_of_date = 0
 
-        # get sub vectors of each orginal values
-        for item in total_lines_manipulated
-            total_lines_manipulated = replace(total_lines_manipulated, item=>split(item, " "))
+    # get sub vectors of each orginal values
+    total_lines_manipulated = [split(item, " ") for item in total_lines]
+    dates = prompt_date("Enter the date you want in format year-month-day (Example: 2024-04-24)", total_lines_manipulated)
+    # check if date in weather file and if so return index to access other infomation
+    for date in dates
+        if date in total_lines_manipulated[1]
+            index_of_date = findfirst(==(date), total_lines_manipulated[1])
         end
-        dates = prompt_date("Enter the date you want to enter in format of year-month-day(Example: 2024-04-24)", total_lines_manipulated)
-        # check if date in weather file and if so return index to access other infomation
-        for date in dates
-            if date in total_lines_manipulated[1]
-                index_of_date = findfirst(x -> x == date, total_lines_manipulated[1])
-            end
     
-            println(return_properties(total_lines_manipulated, total_lines, check_for_weather_code,"weather_code" ,index_of_date))
-            println(return_properties(total_lines_manipulated, total_lines, check_for_temperature_max, "temperature_max", index_of_date))
-            println(return_properties(total_lines_manipulated, total_lines, check_for_temperature_min, "temperature_min", index_of_date))
-            println(return_properties(total_lines_manipulated, total_lines, check_for_precipitation_sum, "precipitation_sum", index_of_date))
-            println(return_properties(total_lines_manipulated, total_lines, check_for_wind_speed_max, "wind_speed_max", index_of_date))
-            println(return_properties(total_lines_manipulated, total_lines, check_for_precipitation_probability_max, "precipitation_probability_max", index_of_date))
-        end
+        println(return_properties(total_lines_manipulated, total_lines, check_for_weather_code,"weather_code" ,index_of_date))
+        println(return_properties(total_lines_manipulated, total_lines, check_for_temperature_max, "temperature_max", index_of_date))
+        println(return_properties(total_lines_manipulated, total_lines, check_for_temperature_min, "temperature_min", index_of_date))
+        println(return_properties(total_lines_manipulated, total_lines, check_for_precipitation_sum, "precipitation_sum", index_of_date))
+        println(return_properties(total_lines_manipulated, total_lines, check_for_wind_speed_max, "wind_speed_max", index_of_date))
+        println(return_properties(total_lines_manipulated, total_lines, check_for_precipitation_probability_max, "precipitation_probability_max", index_of_date))
     end
 end
 
