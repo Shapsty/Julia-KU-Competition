@@ -6,6 +6,7 @@ function prompt_path(prompt::String)
     value = readline()
     # normalize path to use forward slash, trust me things get crazy elsewise
     value = replace(value, "\\" => "/")
+    println(value)
     return value
 end
 
@@ -103,9 +104,9 @@ function return_properties(list_manipulated, list_unmaniplated, boolean, string_
         return weather_code_translated
     end
 end
-
-function main()
+function weather_data_analysis()
     file_path = prompt_path("Paste the file path:")
+    # I have been referring to the information currently gathered by prompt_boolean as values in comments
     check_for_weather_code = prompt_boolean("Do you want to check for the weather code?")
     check_for_temperature_max = prompt_boolean("Do you want to check for the temperature max?")
     check_for_temperature_min = prompt_boolean("Do you want to check for the temperature min?")
@@ -118,6 +119,9 @@ function main()
     total_lines_manipulated = total_lines
 
     index_of_date = 0
+
+    # TODO create support for date ranges as well as single dates
+    # TODO be able to find avg, max, min of whatever chosen value(Excluding weather code) we want from that range
 
     # get sub vectors of each orginal values
     total_lines_manipulated = [split(item, " ") for item in total_lines]
@@ -137,4 +141,4 @@ function main()
     end
 end
 
-main()
+weather_data_analysis()
