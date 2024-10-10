@@ -1,14 +1,17 @@
+include("weather.jl")
+include("weather_codes.jl")
+
 using Mousetrap
+
+# Initialize global variables
+global file_path = nothing  
+global start_date = nothing
+global end_date = nothing 
+global selected_amount = nothing
+global selected_value = nothing
 
  main() do app::Application
     window = Window(app)
-
-    # Text Entry for future Rest API integration
-    rest_API_Terminal = Entry()
-    set_text!(rest_API_Terminal, "Write here")
-    connect_signal_activate!(rest_API_Terminal) do self::Entry
-        println("Text is now: $(get_text(rest_API_Terminal))")
-    end
 
     # Simple output Box, currently for testing, also works to show the user their inputs are valid
     output_main = Label()
@@ -22,12 +25,30 @@ using Mousetrap
         set_text!(output_main, "Hist")
         println("Hist")
     end
-    # Button to trigger REST API functionality, may be uneeded
-    rest_API_Button = Button()
-    set_child!(rest_API_Button, Label("Rest"))
-    connect_signal_clicked!(rest_API_Button) do self::Button
-        set_text!(output_main, "Rest")
-        println("Rest")
+    #Submit Button
+    submit = Button()
+    set_child!(submit, Label("Submit"))
+    connect_signal_clicked!(submit) do self::Button
+        if isnothing(file_path)
+            set_text!(output_main, "Please select a file first")
+            println("No file selected")
+        elseif isnothing(start_date) || isnothing(end_date)
+            set_text!(output_main, "Please enter both start and end dates")
+            println("Dates not set")
+        elseif isnothing(selected_amount) || isnothing(selected_value)
+            set_text!(output_main, "Please select amount and value")
+            println("Amount or value not selected")
+        else
+            try
+                result = weather_data_analysis(file_path, start_date, end_date, selected_amount, selected_value)
+                set_text!(output_main, result)
+                println("Result: $result")  # Print to console as well
+            catch e
+                error_msg = "Error processing file: $(sprint(showerror, e))"
+                set_text!(output_main, error_msg)
+                println(error_msg)
+            end
+        end
     end
     # button to be used for mystery feature
     unknown_Purpose_Button = Button()
@@ -40,18 +61,25 @@ using Mousetrap
     file_Explorer = Button()
     set_child!(file_Explorer, Label("File Explorer"))
     connect_signal_clicked!(file_Explorer) do self::Button
-        set_text!(output_main, "File Explorer")
-        println("File Explorer")
-
         chooser = FileChooser(FILE_CHOOSER_ACTION_OPEN_FILE)
 
         on_accept!(chooser) do self::FileChooser, files::Vector{FileDescriptor}
-            println("$files")
-            file_location = "$files"
-            file_location = replace(file_location, "FileDescriptor[FileDescriptor(path = " => "")
-            file_location = replace(file_location, ")]" => "")
-            file_location = replace(file_location, "\"" => "")
-            println(file_location)
+            if !isempty(files)
+                file_desc_str = string(files[1])
+                # Extract the path from the FileDescriptor string representation
+                path_match = match(r"path\s*=\s*(.+?)\)", file_desc_str)
+                if !isnothing(path_match)
+                    file_location = strip(path_match.captures[1])
+                    file_location = replace(file_location, "\"" => "")  # Remove quotes if present
+                    println("Selected file: $file_location")
+                    global file_path = file_location
+                    set_text!(output_main, "File selected: $(basename(file_location))")
+                else
+                    set_text!(output_main, "Error: Couldn't extract file path")
+                end
+            else
+                set_text!(output_main, "No file selected")
+            end
         end
         present!(chooser)
     end
@@ -62,114 +90,84 @@ using Mousetrap
     start_Date_Entry = Entry()
     set_text!(start_Date_Entry, "Start Date (Format year-mm-dd)")
     connect_signal_activate!(start_Date_Entry) do self::Entry
-        println("Start date is: $(get_text(start_Date_Entry))")
+        global start_date = get_text(start_Date_Entry)
+        println("Start date set to: $start_date")
     end
 
     # End Date Text Entry
     end_Date_Entry = Entry()
-    set_text!(end_Date_Entry, "End Date") 
+    set_text!(end_Date_Entry, "End Date (Format year-mm-dd)")
     connect_signal_activate!(end_Date_Entry) do self::Entry
-        println("End date is: $(get_text(end_Date_Entry))")
+        global end_date = get_text(end_Date_Entry)
+        println("End date set to: $end_date")
     end
     
     amount_Drop_Down = DropDown()
     value_Drop_Down = DropDown()
    
-    # Amount Drop Down
+    amount_Drop_Down = DropDown()
     push_back!(amount_Drop_Down, "Amount") do self::DropDown
-        println("Amount")
-        set_text!(output_main, "Amount")
+        global selected_amount = "Amount"
+        println("Selected amount: Amount")
     end
-    push_back!(amount_Drop_Down, "Minimun") do self::DropDown
-        println("Min")
-        set_text!(output_main, "Min")
+    push_back!(amount_Drop_Down, "Minimum") do self::DropDown
+        global selected_amount = "Minimum"
+        println("Selected amount: Minimum")
     end
     push_back!(amount_Drop_Down, "Maximum") do self::DropDown
-        println("Max")
-        set_text!(output_main, "Max")
+        global selected_amount = "Maximum"
+        println("Selected amount: Maximum")
     end
     push_back!(amount_Drop_Down, "Average") do self::DropDown
-        println("Avg")
-        set_text!(output_main, "Avg")
+        global selected_amount = "Average"
+        println("Selected amount: Average")
     end
     push_back!(amount_Drop_Down, "Single Point") do self::DropDown
-        println("single_point")
-        set_text!(output_main, "single_point")
+        global selected_amount = "Single Point"
+        println("Selected amount: Single Point")
     end
-   
-    # Value drop down
+
+    value_Drop_Down = DropDown()
     push_back!(value_Drop_Down, "Value") do self::DropDown
-        println("value")
-        set_text!(output_main, "value")
+        global selected_value = "Value"
+        println("Selected value: Value")
     end
     push_back!(value_Drop_Down, "Day Max Temperature") do self::DropDown
-        println("max_temp")
-        set_text!(output_main, "max_temp")
-        global check_for_weather_code = false
-        global check_for_temperature_max = true
-        global check_for_temperature_min = false
-        global check_for_precipitation_sum = false
-        global check_for_wind_speed_max = false
-        global check_for_precipitation_probability_max = false
-        return nothing
+        global selected_value = "temperature_max"
+        println("Selected value: Day Max Temperature")
     end
     push_back!(value_Drop_Down, "Day Min Temperature") do self::DropDown
-        println("min_temp")
-        set_text!(output_main, "min_temp")
-        global check_for_weather_code = false
-        global check_for_temperature_max = false
-        global check_for_temperature_min = true
-        global check_for_precipitation_sum = false
-        global check_for_wind_speed_max = false
-        global check_for_precipitation_probability_max = false
-        return nothing
+        global selected_value = "temperature_min"
+        println("Selected value: Day Min Temperature")
     end
     push_back!(value_Drop_Down, "Wind") do self::DropDown
-        println("wind")
-        set_text!(output_main, "wind")
-        global check_for_weather_code = false
-        global check_for_temperature_max = false
-        global check_for_temperature_min = false
-        global check_for_precipitation_sum = false
-        global check_for_wind_speed_max = true
-        global check_for_precipitation_probability_max = false
-        return nothing
+        global selected_value = "wind_speed_max"
+        println("Selected value: Wind")
     end
     push_back!(value_Drop_Down, "Code") do self::DropDown
-        println("code")
-        set_text!(output_main, "code")
-        global check_for_weather_code = true
-        global check_for_temperature_max = false
-        global check_for_temperature_min = false
-        global check_for_precipitation_sum = false
-        global check_for_wind_speed_max = false
-        global check_for_precipitation_probability_max = false
-        return nothing
+        global selected_value = "weather_code"
+        println("Selected value: Code")
     end
     push_back!(value_Drop_Down, "Rain") do self::DropDown
-        println("rain")
-        set_text!(output_main, "rain")
-        global check_for_weather_code = false
-        global check_for_temperature_max = false
-        global check_for_temperature_min = false
-        global check_for_precipitation_sum = true
-        global check_for_wind_speed_max = false
-        global check_for_precipitation_probability_max = false
-        return nothing
+        global selected_value = "precipitation_sum"
+        println("Selected value: Rain")
     end
     push_back!(value_Drop_Down, "Rain Chance") do self::DropDown
-        println("rain_prob")
-        set_text!(output_main, "rain_prob")
-        global check_for_weather_code = false
-        global check_for_temperature_max = false
-        global check_for_temperature_min = false
-        global check_for_precipitation_sum = false
-        global check_for_wind_speed_max = false
-        global check_for_precipitation_probability_max = true
-        return nothing
+        global selected_value = "precipitation_probability_max"
+        println("Selected value: Rain Chance")
     end
 
-    set_child!(window, vbox(rest_API_Terminal, start_Date_Entry, end_Date_Entry, amount_Drop_Down, value_Drop_Down, hist_button, rest_API_Button, unknown_Purpose_Button, file_Explorer, output_main))
+    # Layout
+    set_child!(window, vbox(
+        start_Date_Entry, 
+        end_Date_Entry, 
+        amount_Drop_Down, 
+        value_Drop_Down, 
+        hist_button, 
+        file_Explorer,
+        submit, 
+        unknown_Purpose_Button, 
+        output_main
+    ))
     present!(window)
 end
-

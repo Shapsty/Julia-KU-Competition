@@ -1,4 +1,4 @@
-function convert_weather_code_to_words(weather_code)
+function convert_weather_code_to_words(code)
     # could probably just make this a const
     weather_codes = Dict(
         "0.0" => "Cloud development not observed or not observable (Characteristic change of the state of sky during the past hour)",
@@ -102,5 +102,5 @@ function convert_weather_code_to_words(weather_code)
         "98.0" => "Thunderstorm combined with duststorm or sandstorm at time of observation (Thunderstorm at time of observation)",
         "99.0" => "Thunderstorm, heavy, with hail at time of observation (Thunderstorm at time of observation)"
     )
-    return weather_codes[weather_code]
+    return weather_codes[code]
 end
