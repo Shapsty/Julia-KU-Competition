@@ -1,5 +1,7 @@
-const WEATHER_CODES = Dict(
-    "0.0" => "Cloud development not observed or not observable (Characteristic change of the state of sky during the past hour)",
+function convert_weather_code_to_words(code)
+    # could probably just make this a const
+    weather_codes = Dict(
+        "0.0" => "Cloud development not observed or not observable (Characteristic change of the state of sky during the past hour)",
         "1.0" => "Clouds generally dissolving or becoming less developed (Characteristic change of the state of sky during the past hour)",
         "2.0" => "State of sky on the whole unchanged (Characteristic change of the state of sky during the past hour)",
         "3.0" => "Clouds generally forming or developing (Characteristic change of the state of sky during the past hour)",
@@ -99,4 +101,6 @@ const WEATHER_CODES = Dict(
         "97.0" => "Thunderstorm, heavy, without hail but with rain and/or snow at time of observation (Thunderstorm at time of observation)",
         "98.0" => "Thunderstorm combined with duststorm or sandstorm at time of observation (Thunderstorm at time of observation)",
         "99.0" => "Thunderstorm, heavy, with hail at time of observation (Thunderstorm at time of observation)"
-)
+    )
+    return weather_codes[code]
+end
