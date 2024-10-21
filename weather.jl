@@ -96,7 +96,7 @@ function return_properties(list_manipulated, list_unmaniplated, boolean, string_
         index_of_property = return_index_of_property(list_unmaniplated, string_to_check)
 
         # check if this is looking for weather codes
-        if string_to_check != "weather_code" return list_manipulated[index_of_property][index_of_date] end
+        string_to_check != "weather_code" &&  list_manipulated[index_of_property][index_of_date]
 
         # if looking for weather codes translate them
         weather_code_translated = WEATHER_CODES[list_manipulated[index_of_property][index_of_date]]
