@@ -2,6 +2,7 @@ include("weather.jl")
 include("weather_codes.jl")
 
 using Mousetrap
+using Plots
 
 # Initialize global variables
 global file_path = nothing  
@@ -17,11 +18,45 @@ global selected_value = nothing
     output_main = Label()
     set_text!(output_main, "output_text")
 
+    header_bar = get_header_bar(window)
+    set_title!(window, "Mousetrap.jl")
+
+    #light/darl mode swap
+    swap_button = Button(Label("Swap Light/Dark"))
+    set_tooltip_text!(swap_button, "Click to Swap Themes")
+    connect_signal_clicked!(swap_button, app) do self::Button, app::Application
+
+        # get currently used theme
+        current = get_current_theme(app)
+
+        # swap light with dark, preservng whether the theme is high contrast
+        if current == THEME_DEFAULT_DARK
+            next = THEME_DEFAULT_LIGHT
+        elseif current == THEME_DEFAULT_LIGHT
+            next = THEME_DEFAULT_DARK
+        elseif current == THEME_HIGH_CONTRAST_DARK
+            next = THEME_HIGH_CONTRAST_LIGHT
+        elseif current == THEME_HIGH_CONTRAST_LIGHT
+            next = THEME_HIGH_CONTRAST_DARK
+        end
+
+        # set new theme
+        play!(swap_fadeout)
+        set_current_theme!(app, next)
+    end
+    push_front!(header_bar, swap_button)
+    #animation for clicking button  
+    swap_fadeout = Animation(swap_button, seconds(1))
+    on_tick!(swap_fadeout, swap_button) do self::Animation, value::Float64, target::Button
+        set_opacity!(target, 1 - value)
+    end
+    
     # Button for future histogram creation
     hist_button = Button()
     set_child!(hist_button, Label("Hist"))
     connect_signal_clicked!(hist_button) do self::Button
         # Create histogram here
+        
         set_text!(output_main, "Hist")
         println("Hist")
     end
