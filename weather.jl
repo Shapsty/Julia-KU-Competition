@@ -29,7 +29,6 @@ function filter_data_by_date_range(data::Dict, start_date::Date, end_date::Date)
     return filtered_data
 end
 
-
 function weather_data_analysis(file_path::String, start_date_str::String, end_date_str::String, selected_amount::String, selected_value::String)
     if isempty(file_path) || !isfile(file_path)
         return "Invalid file path"
