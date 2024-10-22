@@ -2,7 +2,6 @@ include("weather.jl")
 include("weather_codes.jl")
 
 using Mousetrap
-using Plots
 
 # Initialize global variables
 global file_path = nothing  
@@ -10,6 +9,7 @@ global start_date = nothing
 global end_date = nothing 
 global selected_amount = nothing
 global selected_value = nothing
+
 
  main() do app::Application
     window = Window(app)
@@ -56,7 +56,7 @@ global selected_value = nothing
     set_child!(hist_button, Label("Hist"))
     connect_signal_clicked!(hist_button) do self::Button
         # Create histogram here
-        
+        gui()
         set_text!(output_main, "Hist")
         println("Hist")
     end
