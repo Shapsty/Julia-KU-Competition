@@ -29,6 +29,7 @@ function filter_data_by_date_range(data::Dict, start_date::Date, end_date::Date)
     return filtered_data
 end
 
+
 function weather_data_analysis(file_path::String, start_date_str::String, end_date_str::String, selected_amount::String, selected_value::String)
     if isempty(file_path) || !isfile(file_path)
         return "Invalid file path"
@@ -75,13 +76,19 @@ function weather_data_analysis(file_path::String, start_date_str::String, end_da
         elseif selected_amount == "Average"
             mean(values)
         elseif selected_amount == "Single Point"
-            values[1]
+            # Return all values for the date range
+            dates = start_date:Day(1):end_date
+            daily_values = ["$date: $(values[i])" for (i, date) in enumerate(dates) if i <= length(values)]
+            join(daily_values, "\n")
         else
             nothing
         end
     else
         if selected_amount == "Single Point"
-            values[1]
+            # Return all values for the date range
+            dates = start_date:Day(1):end_date
+            daily_values = ["$date: $(values[i])" for (i, date) in enumerate(dates) if i <= length(values)]
+            join(daily_values, "\n")
         else
             join(values, ", ")
         end
@@ -90,6 +97,10 @@ function weather_data_analysis(file_path::String, start_date_str::String, end_da
     if isnothing(result)
         return "Unable to calculate $selected_amount for $selected_value"
     else
-        return "$selected_amount $selected_value: $result"
+        if selected_amount == "Single Point"
+            return "Daily $selected_value values:\n$result"
+        else
+            return "$selected_amount $selected_value: $result"
+        end
     end
 end
