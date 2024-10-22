@@ -83,7 +83,7 @@ global selected_value = nothing
 
             try
                 result = weather_data_analysis(file_path, start_date, end_date, selected_amount, selected_value)
-                set_text!(output_main, result)
+                set_text!(output_main, result[1])
                 println("Result: $result")  # Print to console as well
             catch e
                 error_msg = "Error processing file: $(sprint(showerror, e))"

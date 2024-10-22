@@ -79,6 +79,7 @@ function weather_data_analysis(file_path::String, start_date_str::String, end_da
             # Return all values for the date range
             dates = start_date:Day(1):end_date
             daily_values = ["$date: $(values[i])" for (i, date) in enumerate(dates) if i <= length(values)]
+            daily_values_without_dates = [(values[i]) for (i, date) in enumerate(dates) if i <= length(values)]
             join(daily_values, "\n")
         else
             nothing
@@ -98,7 +99,7 @@ function weather_data_analysis(file_path::String, start_date_str::String, end_da
         return "Unable to calculate $selected_amount for $selected_value"
     else
         if selected_amount == "Single Point"
-            return "Daily $selected_value values:\n$result"
+            return "Daily $selected_value values:\n$result", daily_values_without_dates
         else
             return "$selected_amount $selected_value: $result"
         end
