@@ -6,7 +6,7 @@ using Mousetrap
 # Initialize global variables
 global file_path = nothing  
 global start_date = nothing
-global end_date = nothing 
+global end_date = nothing
 global selected_amount = nothing
 global selected_value = nothing
 
@@ -16,6 +16,7 @@ global selected_value = nothing
     # Simple output Box, currently for testing, also works to show the user their inputs are valid
     output_main = Label()
     set_text!(output_main, "output_text")
+    
 
     # Button for future histogram creation
     hist_button = Button()
@@ -32,13 +33,19 @@ global selected_value = nothing
         if isnothing(file_path)
             set_text!(output_main, "Please select a file first")
             println("No file selected")
-        elseif isnothing(start_date) || isnothing(end_date)
+        elseif isnothing(start_date) 
             set_text!(output_main, "Please enter both start and end dates")
             println("Dates not set")
         elseif isnothing(selected_amount) || isnothing(selected_value)
             set_text!(output_main, "Please select amount and value")
             println("Amount or value not selected")
         else
+
+            if isnothing(end_date) || isempty(get_text(end_Date_Entry))
+                global end_date = start_date
+                set_text!(end_Date_Entry, start_date)
+            end
+
             try
                 result = weather_data_analysis(file_path, start_date, end_date, selected_amount, selected_value)
                 set_text!(output_main, result)
