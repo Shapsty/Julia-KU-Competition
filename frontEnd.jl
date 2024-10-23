@@ -2,7 +2,7 @@ include("weather.jl")
 include("weather_codes.jl")
 include("test.jl")
 
-using Mousetrap
+using Mousetrap, Images, ImageView
 
 # Initialize global variables
 global file_path = nothing  
@@ -52,6 +52,8 @@ global selected_value = nothing
     set_child!(hist_button, Label("Hist"))
     connect_signal_clicked!(hist_button) do self::Button
         # Create histogram here
+        img = load("histogram.png")
+        imshow(img)
         set_text!(output_main, "Hist")
         println("Hist")
     end
