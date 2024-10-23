@@ -1,10 +1,10 @@
-using Plots
+using Plots, Images, ImageView
 
 function create_histogram(values)
     h = histogram(values)
-    ylabel!(h, "Occurances")
+    ylabel!(h, "Occurrences")
     xlabel!(h, "Values")
-    display(h)
-    savefig(h, "histogram.pdf")
+    png(h, "histogram")
+    # Now you can load the PNG if needed:
+
 end
-sleep(300)
