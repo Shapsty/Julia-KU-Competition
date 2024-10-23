@@ -51,8 +51,11 @@ global selected_value = nothing
     hist_button = Button()
     set_child!(hist_button, Label("Hist"))
     connect_signal_clicked!(hist_button) do self::Button
-        # Create histogram here
+        # load Images
         img = load("histogram.png")
+        bar_img = load("bar.png")
+        # display Images
+        imshow(bar_img)
         imshow(img)
         set_text!(output_main, "Hist")
         println("Hist")
@@ -81,6 +84,7 @@ global selected_value = nothing
                 result = weather_data_analysis(file_path, start_date, end_date, selected_amount, selected_value)
                 set_text!(output_main, result[1])
                 create_histogram(result[2])
+                create_bargraph(result[2])
                 println("Result: $result")  # Print to console as well
             catch e
                 error_msg = "Error processing file: $(sprint(showerror, e))"
