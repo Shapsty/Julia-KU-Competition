@@ -10,6 +10,9 @@ global start_date = nothing
 global end_date = nothing
 global selected_amount = nothing
 global selected_value = nothing
+global second_date_start = nothing
+global second_date_end = nothing
+global comparison_bool = false
 
 
  main() do app::Application
@@ -64,6 +67,7 @@ global selected_value = nothing
     submit = Button()
     set_child!(submit, Label("Submit"))
     connect_signal_clicked!(submit) do self::Button
+    if comparison_bool == false    
         if isnothing(file_path)
             set_text!(output_main, "Please select a file first")
             println("No file selected")
@@ -92,11 +96,48 @@ global selected_value = nothing
                 println(error_msg)
             end
         end
+    elseif comparison_bool == true
+        if isnothing(file_path)
+            set_text!(output_main, "Please select a file first")
+            println("No file selected")
+        elseif isnothing(start_date) || isnothing(end_date)
+            set_text!(output_main, "Please enter both start and end dates")
+            println("Dates not set")
+        elseif isnothing(selected_amount) || isnothing(selected_value)
+            set_text!(output_main, "Please select amount or value")
+            println("Amount or value not selected")
+        else
+            if isnothing(second_date_end)|| isempty(get_text(second_Date_End))
+                global second_date_end = end_date
+                set_text!(second_Date_End, second_date_end)
+            elseif isnothing(second_date_start) || isempty(get_text(second_Date_Start))
+                global second_date_start = start_date
+                set_text!(second_Date_Start, second_date_start)
+            end
+            
+            try
+                result = weather_data_analysis_2(file_path, start_date, end_date, selected_amount, selected_value, second_date_start, second_date_end)
+                set_text!(output_main, result[1])
+                create_histogram(result[2])
+                create_bargraph(result[2])
+                println("Result: $result")  # Print to console as well
+            catch e
+                error_msg = "Error processing file: $(sprint(showerror, e))"
+                set_text!(output_main, error_msg)
+                println(error_msg)
+            end
     end
+    end
+end
     # button to be used for mystery feature
-    unknown_Purpose_Button = Button()
-    set_child!(unknown_Purpose_Button, Label("?"))
-    connect_signal_clicked!(unknown_Purpose_Button) do self::Button
+    comparison = Button()
+    set_child!(comparison, Label("Comparison"))
+    connect_signal_clicked!(comparison) do self::Button
+        if comparison_bool == false
+            comparison_bool = true
+        elseif comparison_bool == true
+            comparison_bool = false
+        end
         set_text!(output_main, "N/A")
         println("N/A")
     end
@@ -136,6 +177,12 @@ global selected_value = nothing
         global start_date = get_text(start_Date_Entry)
         println("Start date set to: $start_date")
     end
+    second_Date_Start = Entry()
+    set_text!(second_Date_Start, "Second Date in first Range")
+    connect_signal_activate!(second_Date_Start) do self::Entry
+        global second_date_start = get_text(second_Date_Start)
+        println("Second date set to: $second_date_start")
+    end
 
     # End Date Text Entry
     end_Date_Entry = Entry()
@@ -143,6 +190,12 @@ global selected_value = nothing
     connect_signal_activate!(end_Date_Entry) do self::Entry
         global end_date = get_text(end_Date_Entry)
         println("End date set to: $end_date")
+    end
+    second_Date_End = Entry()
+    set_text!(second_Date_End, "Second Date in second Range")
+    connect_signal_activate!(second_Date_End) do self::Entry
+        global second_date_end = get_text(second_Date_End)
+        println("Second date set to: $second_date_end")
     end
     
     amount_Drop_Down = DropDown()
@@ -203,14 +256,17 @@ global selected_value = nothing
     # Layout
     set_child!(window, vbox(
         start_Date_Entry, 
+        second_Date_Start,
         end_Date_Entry, 
+        second_Date_End,
         amount_Drop_Down, 
         value_Drop_Down, 
         hist_button, 
         file_Explorer,
-        submit, 
-        unknown_Purpose_Button, 
+        submit,
+        comparison, 
         output_main
     ))
     present!(window)
 end
+
