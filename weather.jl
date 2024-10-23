@@ -99,9 +99,12 @@ function weather_data_analysis(file_path::String, start_date_str::String, end_da
         return "Unable to calculate $selected_amount for $selected_value"
     else
         if selected_amount == "Single Point"
+            if selected_value == "weather_code"
+                return "Daily $selected_value values:\n$result", 0
+            end
             return "Daily $selected_value values:\n$result", daily_values_without_dates
         else
-            return "$selected_amount $selected_value: $result"
+            return "$selected_amount $selected_value: $result", [result]
         end
     end
 end
