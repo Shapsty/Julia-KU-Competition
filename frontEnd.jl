@@ -1,5 +1,6 @@
 include("weather.jl")
 include("weather_codes.jl")
+include("test.jl")
 
 using Mousetrap
 
@@ -42,22 +43,15 @@ global selected_value = nothing
         end
 
         # set new theme
-        play!(swap_fadeout)
         set_current_theme!(app, next)
     end
     push_front!(header_bar, swap_button)
-    #animation for clicking button  
-    swap_fadeout = Animation(swap_button, seconds(1))
-    on_tick!(swap_fadeout, swap_button) do self::Animation, value::Float64, target::Button
-        set_opacity!(target, 1 - value)
-    end
     
     # Button for future histogram creation
     hist_button = Button()
     set_child!(hist_button, Label("Hist"))
     connect_signal_clicked!(hist_button) do self::Button
         # Create histogram here
-        gui()
         set_text!(output_main, "Hist")
         println("Hist")
     end
@@ -84,6 +78,7 @@ global selected_value = nothing
             try
                 result = weather_data_analysis(file_path, start_date, end_date, selected_amount, selected_value)
                 set_text!(output_main, result[1])
+                create_histogram(result[2])
                 println("Result: $result")  # Print to console as well
             catch e
                 error_msg = "Error processing file: $(sprint(showerror, e))"
